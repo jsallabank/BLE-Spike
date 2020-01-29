@@ -10,12 +10,14 @@ import { BLE } from '@ionic-native/ble/ngx';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { BleService } from 'src/services/ble/ble';
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule],
   providers: [
+    BleService,
     BLE,
     StatusBar,
     SplashScreen,

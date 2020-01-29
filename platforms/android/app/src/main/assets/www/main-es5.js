@@ -576,6 +576,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @ionic-native/ble/ngx */ "./node_modules/@ionic-native/ble/ngx/index.js");
 /* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
 /* harmony import */ var _app_routing_module__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./app-routing.module */ "./src/app/app-routing.module.ts");
+/* harmony import */ var src_services_ble_ble__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! src/services/ble/ble */ "./src/services/ble/ble.ts");
+
 
 
 
@@ -595,6 +597,7 @@ var AppModule = /** @class */ (function () {
             entryComponents: [],
             imports: [_angular_platform_browser__WEBPACK_IMPORTED_MODULE_2__["BrowserModule"], _ionic_angular__WEBPACK_IMPORTED_MODULE_4__["IonicModule"].forRoot(), _app_routing_module__WEBPACK_IMPORTED_MODULE_9__["AppRoutingModule"]],
             providers: [
+                src_services_ble_ble__WEBPACK_IMPORTED_MODULE_10__["BleService"],
                 _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_7__["BLE"],
                 _ionic_native_status_bar_ngx__WEBPACK_IMPORTED_MODULE_6__["StatusBar"],
                 _ionic_native_splash_screen_ngx__WEBPACK_IMPORTED_MODULE_5__["SplashScreen"],
@@ -664,6 +667,91 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 
 /***/ }),
 
+/***/ "./src/services/ble/ble.ts":
+/*!*********************************!*\
+  !*** ./src/services/ble/ble.ts ***!
+  \*********************************/
+/*! exports provided: BleService */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BleService", function() { return BleService; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ionic-native/ble/ngx */ "./node_modules/@ionic-native/ble/ngx/index.js");
+
+
+
+var BleService = /** @class */ (function () {
+    function BleService(ble, ngZone) {
+        this.ble = ble;
+        this.ngZone = ngZone;
+        this.devices = [];
+        this.peripheral = {};
+        this.service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
+        this.characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
+    }
+    BleService.prototype.getDevices = function () {
+        var _this = this;
+        this.devices = [];
+        this.ble.scan([], 10).subscribe(function (device) { return _this.onDeviceDiscovered(device); });
+        return this.devices;
+    };
+    BleService.prototype.onDeviceDiscovered = function (device) {
+        var _this = this;
+        console.log('Discovered' + JSON.stringify(device, null, 2));
+        this.ngZone.run(function () {
+            _this.devices.push(device);
+            console.log(device);
+        });
+    };
+    BleService.prototype.connect = function (id, cb) {
+        var _this = this;
+        this.ble.connect(id).subscribe(function (peripheral) { return _this.onConnect(peripheral, cb); }, function (peripheral) { return _this.onDisconnect(); });
+    };
+    BleService.prototype.onDisconnect = function () {
+        alert('Disconnected');
+    };
+    BleService.prototype.onConnect = function (peripheral, cb) {
+        var _this = this;
+        this.peripheral = peripheral;
+        alert('Connected to ' + (peripheral.name || peripheral.id));
+        // Subscribe for notifications when the data changes
+        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(function (data) { return _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to subscribe for data changes'); });
+        // Read the current value of the data characteristic
+        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(function (data) { return _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to get dat'); });
+    };
+    BleService.prototype.getCurrent = function () {
+        return this.globalData;
+    };
+    BleService.prototype.onChange = function (buffer, cb) {
+        var _this = this;
+        var data = new Uint8Array(buffer);
+        this.ngZone.run(function () {
+            alert(data[0]);
+            _this.globalData = data[0];
+            cb();
+        });
+    };
+    BleService.prototype.writeToPeripheral = function (id, writeData) {
+        this.ble.write(id, this.service_uuid, this.characteristic_uuid, writeData).then(function () { return alert('succesful write'); }, function () { return alert('write unsuccessful'); });
+    };
+    BleService.ctorParameters = function () { return [
+        { type: _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__["BLE"] },
+        { type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["NgZone"] }
+    ]; };
+    BleService = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Injectable"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__["BLE"], _angular_core__WEBPACK_IMPORTED_MODULE_1__["NgZone"]])
+    ], BleService);
+    return BleService;
+}());
+
+
+
+/***/ }),
+
 /***/ 0:
 /*!***************************!*\
   !*** multi ./src/main.ts ***!
@@ -671,7 +759,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_1__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/sallos/Desktop/BLE-Spike/BLE-Spike/src/main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! /Users/sallos/Desktop/repo/BLE-Spike/src/main.ts */"./src/main.ts");
 
 
 /***/ })

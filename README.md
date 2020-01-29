@@ -1,5 +1,7 @@
 # BLE-Spike - ionic app (tested on android)
 
+//to run app sudo ionic cordova run android --device
+
 //**Testing uses two different BT Sim apps */
 
   //*for BLE peripheral sim* (to test read and notify functionality on battery service)
