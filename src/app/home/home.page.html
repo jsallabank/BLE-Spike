@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      BLE Spike
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ion-padding">
+    <p>Current data being received: {{globalData}}</p>
+    <ion-button (click)='writeIt()'>Write Data</ion-button>
+    <ion-button (click)='scan()'>Scan</ion-button>
+  </div>
+  <ion-list>
+    <ion-card-content ion-item *ngFor="let device of devices">
+      <p>{{device.name || 'Unnamed'}}</p>
+      <p>{{device.id}}</p>
+      <p> RSSI: {{device.rssi}}</p>
+      <p><ion-button (click)='connect(device.id)'>Connect</ion-button></p>
+    </ion-card-content>
+  </ion-list>
+</ion-content>

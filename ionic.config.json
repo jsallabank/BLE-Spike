@@ -1,0 +1,7 @@
+{
+  "name": "BLE-Spike",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
