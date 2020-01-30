@@ -669,6 +669,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var globalData = 0;
 let BleService = class BleService {
     constructor(ble, ngZone) {
         this.ble = ble;
@@ -691,7 +692,7 @@ let BleService = class BleService {
         });
     }
     connect(id, cb) {
-        this.ble.connect(id).subscribe(peripheral => this.onConnect(peripheral, cb), peripheral => this.onDisconnect());
+        this.ble.connect(id).subscribe(peripheral => this.onConnect(peripheral, cb), () => this.onDisconnect());
     }
     onDisconnect() {
         alert('Disconnected');
@@ -700,18 +701,20 @@ let BleService = class BleService {
         this.peripheral = peripheral;
         alert('Connected to ' + (peripheral.name || peripheral.id));
         // Subscribe for notifications when the data changes
-        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(data => this.onChange(data, cb), () => alert('Unexpected Error, ' + 'Failed to subscribe for data changes'));
+        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(data => { this.onChange(data, cb); }, () => alert('Unexpected Error, ' + 'Failed to subscribe for data changes'));
         // Read the current value of the data characteristic
-        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(data => this.onChange(data, cb), () => alert('Unexpected Error, ' + 'Failed to get dat'));
+        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(data => { this.onChange(data, cb); }, () => alert('Unexpected Error, ' + 'Failed to get dat'));
+    }
+    notified() {
+        alert('Notified/Read: ' + globalData);
     }
     getCurrent() {
-        return this.globalData;
+        return globalData;
     }
     onChange(buffer, cb) {
         var data = new Uint8Array(buffer);
         this.ngZone.run(() => {
-            alert(data[0]);
-            this.globalData = data[0];
+            globalData = data[0];
             cb();
         });
     }

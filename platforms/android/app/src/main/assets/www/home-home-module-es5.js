@@ -7,7 +7,7 @@
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<ion-header>\n  <ion-toolbar>\n    <ion-title>\n      BLE Spike\n    </ion-title>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content>\n  <div class=\"ion-padding\">\n    <p>Current data being received: {{htmlData}}</p>\n    <ion-button (click)='write()'>Write Data</ion-button>\n    <ion-button (click)='scan()'>Scan</ion-button>\n  </div>\n  <ion-list>\n    <ion-card-content ion-item *ngFor=\"let device of devices\">\n      <p>{{device.name || 'Unnamed'}}</p>\n      <p>{{device.id}}</p>\n      <p> RSSI: {{device.rssi}}</p>\n      <p><ion-button (click)='connect(device.id)'>Connect</ion-button></p>\n    </ion-card-content>\n  </ion-list>\n</ion-content>\n"
+module.exports = "<ion-header>\n  <ion-toolbar>\n    <ion-title>\n      BLE Spike\n    </ion-title>\n  </ion-toolbar>\n</ion-header>\n\n<ion-content>\n  <div class=\"ion-padding\">\n    <p>Current data being received: {{htmlData}}</p>\n    <ion-button (click)='write()'>Write Data</ion-button>\n    <ion-button (click)='scan()'>Scan</ion-button>\n    <ion-button (click)='displayData()'>Update Value</ion-button>\n  </div>\n  <ion-list>\n    <ion-card-content ion-item *ngFor=\"let device of devices\">\n      <p>{{device.name || 'Unnamed'}}</p>\n      <p>{{device.id}}</p>\n      <p> RSSI: {{device.rssi}}</p>\n      <p><ion-button (click)='connect(device.id)'>Connect</ion-button></p>\n    </ion-card-content>\n  </ion-list>\n</ion-content>\n"
 
 /***/ }),
 
@@ -84,15 +84,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HomePage", function() { return HomePage; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @ionic-native/ble/ngx */ "./node_modules/@ionic-native/ble/ngx/index.js");
-/* harmony import */ var _services_ble_ble__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/ble/ble */ "./src/services/ble/ble.ts");
-
+/* harmony import */ var _services_ble_ble__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../services/ble/ble */ "./src/services/ble/ble.ts");
 
 
 
 var HomePage = /** @class */ (function () {
-    function HomePage(ble, ngZone, bleService) {
-        this.ble = ble;
+    function HomePage(ngZone, bleService) {
         this.ngZone = ngZone;
         this.bleService = bleService;
         this.devices = [];
@@ -101,12 +98,11 @@ var HomePage = /** @class */ (function () {
         this.devices = this.bleService.getDevices();
     };
     HomePage.prototype.connect = function (id) {
-        this.bleService.connect(id, this.callback);
+        this.bleService.connect(id, this.bleService.notified);
         this.currentBleId = id;
     };
-    HomePage.prototype.callback = function () {
+    HomePage.prototype.displayData = function () {
         this.htmlData = this.bleService.getCurrent();
-        alert('Data: ' + this.htmlData);
     };
     HomePage.prototype.write = function () {
         var data = new Uint8Array(1);
@@ -115,9 +111,8 @@ var HomePage = /** @class */ (function () {
         this.bleService.writeToPeripheral(this.currentBleId, formattedData);
     };
     HomePage.ctorParameters = function () { return [
-        { type: _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__["BLE"] },
         { type: _angular_core__WEBPACK_IMPORTED_MODULE_1__["NgZone"] },
-        { type: _services_ble_ble__WEBPACK_IMPORTED_MODULE_3__["BleService"] }
+        { type: _services_ble_ble__WEBPACK_IMPORTED_MODULE_2__["BleService"] }
     ]; };
     HomePage = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
@@ -125,7 +120,7 @@ var HomePage = /** @class */ (function () {
             template: __webpack_require__(/*! raw-loader!./home.page.html */ "./node_modules/raw-loader/index.js!./src/app/home/home.page.html"),
             styles: [__webpack_require__(/*! ./home.page.scss */ "./src/app/home/home.page.scss")]
         }),
-        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__["BLE"], _angular_core__WEBPACK_IMPORTED_MODULE_1__["NgZone"], _services_ble_ble__WEBPACK_IMPORTED_MODULE_3__["BleService"]])
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [_angular_core__WEBPACK_IMPORTED_MODULE_1__["NgZone"], _services_ble_ble__WEBPACK_IMPORTED_MODULE_2__["BleService"]])
     ], HomePage);
     return HomePage;
 }());

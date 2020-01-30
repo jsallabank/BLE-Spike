@@ -683,6 +683,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+var globalData = 0;
 var BleService = /** @class */ (function () {
     function BleService(ble, ngZone) {
         this.ble = ble;
@@ -708,7 +709,7 @@ var BleService = /** @class */ (function () {
     };
     BleService.prototype.connect = function (id, cb) {
         var _this = this;
-        this.ble.connect(id).subscribe(function (peripheral) { return _this.onConnect(peripheral, cb); }, function (peripheral) { return _this.onDisconnect(); });
+        this.ble.connect(id).subscribe(function (peripheral) { return _this.onConnect(peripheral, cb); }, function () { return _this.onDisconnect(); });
     };
     BleService.prototype.onDisconnect = function () {
         alert('Disconnected');
@@ -718,19 +719,20 @@ var BleService = /** @class */ (function () {
         this.peripheral = peripheral;
         alert('Connected to ' + (peripheral.name || peripheral.id));
         // Subscribe for notifications when the data changes
-        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(function (data) { return _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to subscribe for data changes'); });
+        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(function (data) { _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to subscribe for data changes'); });
         // Read the current value of the data characteristic
-        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(function (data) { return _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to get dat'); });
+        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(function (data) { _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to get dat'); });
+    };
+    BleService.prototype.notified = function () {
+        alert('Notified/Read: ' + globalData);
     };
     BleService.prototype.getCurrent = function () {
-        return this.globalData;
+        return globalData;
     };
     BleService.prototype.onChange = function (buffer, cb) {
-        var _this = this;
         var data = new Uint8Array(buffer);
         this.ngZone.run(function () {
-            alert(data[0]);
-            _this.globalData = data[0];
+            globalData = data[0];
             cb();
         });
     };

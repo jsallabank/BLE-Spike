@@ -11,6 +11,7 @@
     <p>Current data being received: {{htmlData}}</p>
     <ion-button (click)='write()'>Write Data</ion-button>
     <ion-button (click)='scan()'>Scan</ion-button>
+    <ion-button (click)='displayData()'>Update Value</ion-button>
   </div>
   <ion-list>
     <ion-card-content ion-item *ngFor="let device of devices">

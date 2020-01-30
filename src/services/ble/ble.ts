@@ -1,14 +1,17 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BLE } from '@ionic-native/ble/ngx';
+var globalData = 0;
 @Injectable()
 export class BleService {
     devices:any[] = [];
     peripheral: any = {};
-    globalData = '55';
+    
+    
     service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
     characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
-
+    
     constructor(private ble:BLE,private ngZone: NgZone) {}
+
 
     getDevices(){
         this.devices = [];
@@ -28,7 +31,7 @@ export class BleService {
     connect(id,cb){
       this.ble.connect(id).subscribe(
         peripheral => this.onConnect(peripheral,cb),
-          peripheral => this.onDisconnect()
+          () => this.onDisconnect()
       );
     }
  
@@ -41,27 +44,28 @@ export class BleService {
       alert('Connected to ' + (peripheral.name || peripheral.id))
         // Subscribe for notifications when the data changes
     this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(
-      data => this.onChange(data,cb),
+      data => {this.onChange(data,cb)},
       () => alert('Unexpected Error, '+ 'Failed to subscribe for data changes')
     )
 
     // Read the current value of the data characteristic
     this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(
-      data => this.onChange(data,cb),
+      data => {this.onChange(data,cb)},
       () => alert('Unexpected Error, '+ 'Failed to get dat')
     )
     }    
 
+    notified(){
+      alert('Notified/Read: ' + globalData);
+    }
     getCurrent(){
-      
-      return this.globalData;
+      return globalData;
     }
 
     onChange(buffer:ArrayBuffer,cb){
       var data = new Uint8Array(buffer);
       this.ngZone.run(() => {
-      alert(data[0]);
-      this.globalData = data[0];
+       globalData = data[0];
       cb();
     });
     

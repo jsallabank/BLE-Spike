@@ -9,26 +9,22 @@ import { BleService } from '../../services/ble/ble';
 })
 
 export class HomePage {
-  htmlData;
+  htmlData:number;
   currentBleId;
   
   devices:any[] = [];
-  constructor(private ble:BLE,private ngZone: NgZone,public bleService: BleService){} 
+  constructor(private ngZone: NgZone,public bleService: BleService){} 
   
   scan(){
     this.devices = this.bleService.getDevices();
   }
-
   connect(id){
-    this.bleService.connect(id,this.callback)
+    this.bleService.connect(id,this.bleService.notified)
     this.currentBleId = id;
   }    
-
-  callback(){
-   this.htmlData = this.bleService.getCurrent();
-   alert('Data: ' + this.htmlData);
+  displayData(){
+    this.htmlData = this.bleService.getCurrent();
   }
-  
   write(){
   var data = new Uint8Array(1);
   data[0] = 1;
