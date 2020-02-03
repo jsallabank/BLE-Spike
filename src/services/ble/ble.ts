@@ -1,18 +1,18 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BLE } from '@ionic-native/ble/ngx';
+import { mockBLE } from './mockBLE';
 var globalData = 0;
 @Injectable()
 export class BleService {
     devices:any[] = [];
     peripheral: any = {};
-    
-    
+    connectBLE = this.ble.connect;
     service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
     characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
     
-    constructor(private ble:BLE,private ngZone: NgZone) {}
+    constructor(private ble:mockBLE,private ngZone: NgZone) {}
 
-
+    
     getDevices(){
         this.devices = [];
         this.ble.scan([],10).subscribe(
@@ -21,6 +21,7 @@ export class BleService {
         return this.devices;
     }
     onDeviceDiscovered(device){
+      console.log('device:' + device[0]);
       console.log('Discovered' + JSON.stringify(device,null,2));
       this.ngZone.run(()=>{
         this.devices.push(device)

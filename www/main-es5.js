@@ -701,6 +701,7 @@ var BleService = /** @class */ (function () {
     };
     BleService.prototype.onDeviceDiscovered = function (device) {
         var _this = this;
+        console.log('device:' + device);
         console.log('Discovered' + JSON.stringify(device, null, 2));
         this.ngZone.run(function () {
             _this.devices.push(device);

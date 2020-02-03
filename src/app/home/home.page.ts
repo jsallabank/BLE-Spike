@@ -1,5 +1,4 @@
 import { Component, NgZone} from '@angular/core';
-import { BLE } from '@ionic-native/ble/ngx';
 import { BleService } from '../../services/ble/ble';
 
 @Component({

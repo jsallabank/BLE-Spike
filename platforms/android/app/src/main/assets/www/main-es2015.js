@@ -685,6 +685,7 @@ let BleService = class BleService {
         return this.devices;
     }
     onDeviceDiscovered(device) {
+        console.log('device:' + device);
         console.log('Discovered' + JSON.stringify(device, null, 2));
         this.ngZone.run(() => {
             this.devices.push(device);
