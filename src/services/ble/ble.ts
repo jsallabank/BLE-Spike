@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { BLE } from '@ionic-native/ble/ngx';
-import { mockBLE } from './mockBLE';
+
 var globalData = 0;
 @Injectable()
 export class BleService {
@@ -10,7 +10,7 @@ export class BleService {
     service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
     characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
     
-    constructor(private ble:mockBLE,private ngZone: NgZone) {}
+    constructor(public ble:BLE,private ngZone: NgZone) {}
 
     
     getDevices(){
@@ -30,10 +30,11 @@ export class BleService {
     }
 
     connect(id,cb){
-      this.ble.connect(id).subscribe(
-        peripheral => this.onConnect(peripheral,cb),
-          () => this.onDisconnect()
-      );
+      console.log(this.ble)
+       this.ble.connect(id).subscribe(
+         peripheral => this.onConnect(peripheral,cb),
+           () => this.onDisconnect()
+       );
     }
  
     onDisconnect(){
@@ -42,17 +43,17 @@ export class BleService {
 
     onConnect(peripheral,cb){
       this.peripheral = peripheral;
-      alert('Connected to ' + (peripheral.name || peripheral.id))
+      //alert('Connected to ' + (peripheral.name || peripheral.id))
         // Subscribe for notifications when the data changes
     this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(
       data => {this.onChange(data,cb)},
-      () => alert('Unexpected Error, '+ 'Failed to subscribe for data changes')
+      () => alert('Unexpected Error, Failed to subscribe for data changes')
     )
 
     // Read the current value of the data characteristic
     this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(
       data => {this.onChange(data,cb)},
-      () => alert('Unexpected Error, '+ 'Failed to get dat')
+      () => alert('Unexpected Error, Failed to read')
     )
     }    
 
