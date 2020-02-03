@@ -63,7 +63,9 @@ export class BleService {
     getCurrent(){
       return globalData;
     }
-
+    setData(myNumber){
+      globalData = myNumber;
+    }
     onChange(buffer:ArrayBuffer,cb){
       var data = new Uint8Array(buffer);
       this.ngZone.run(() => {
@@ -74,6 +76,7 @@ export class BleService {
     }
 
     writeToPeripheral(id,writeData:ArrayBuffer){
+      console.log('-----------------------')
         this.ble.write(id, this.service_uuid, this.characteristic_uuid, writeData).then(
         () => alert('succesful write'),
         () => alert('write unsuccessful')
