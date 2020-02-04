@@ -7,8 +7,8 @@ export class BleService {
   devices: any[] = [];
   peripheral: any = {};
   connectBLE = this.ble.connect;
-  service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
-  characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
+  serviceUuid = '0000180F-0000-1000-8000-00805f9b34fb';
+  characteristicUuid = '00002A19-0000-1000-8000-00805f9b34fb';
   alertMsg: string = 'default alert';
   constructor(public ble: BLE, private ngZone: NgZone) { }
 
@@ -43,19 +43,19 @@ export class BleService {
 
   onConnect(peripheral, cb) {
     this.peripheral = peripheral;
-    this.service_uuid = this.peripheral.characteristics[0].service;
-    this.characteristic_uuid = this.peripheral.characteristics[0].characteristic;
+    this.serviceUuid = this.peripheral.characteristics[0].service;
+    this.characteristicUuid = this.peripheral.characteristics[0].characteristic;
     alert('Connected to ' + (peripheral.name || peripheral.id))
     // Subscribe for notifications when the data changes
-    this.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid, cb);
+    this.read(this.peripheral.id, this.serviceUuid, this.characteristicUuid, cb);
   }
 
-  read(id, service_uuid, characteristic_uuid, cb) {
+  read(id, serviceUuid, characteristicUuid, cb) {
     // Read the current value of the data characteristic
-    this.ble.read(id, service_uuid, characteristic_uuid).then(
+    this.ble.read(id, serviceUuid, characteristicUuid).then(
       data => {
         this.onChange(data, cb);
-        this.startNotification(id, service_uuid, characteristic_uuid, cb)
+        this.startNotification(id, serviceUuid, characteristicUuid, cb)
       },
       () => {
         this.alertMsg = 'Unexpected Error, Failed to read';
@@ -64,8 +64,8 @@ export class BleService {
     )
   }
 
-  startNotification(id, service_uuid, characteristic_uuid, cb) {
-    this.ble.startNotification(id, service_uuid, characteristic_uuid).subscribe(
+  startNotification(id, serviceUuid, characteristicUuid, cb) {
+    this.ble.startNotification(id, serviceUuid, characteristicUuid).subscribe(
       data => { this.onChange(data, cb) },
       () => {
         this.alertMsg = 'Unexpected Error, Failed to subscribe for data changes';
@@ -93,7 +93,7 @@ export class BleService {
   }
 
   writeToPeripheral(id, writeData: ArrayBuffer) {
-    this.ble.write(id, this.service_uuid, this.characteristic_uuid, writeData).then(
+    this.ble.write(id, this.serviceUuid, this.characteristicUuid, writeData).then(
       () => {
         this.alertMsg = 'succesful write';
         alert(this.alertMsg)

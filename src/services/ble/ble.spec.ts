@@ -1,11 +1,6 @@
 import { Injectable, NgZone,Component } from '@angular/core/';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BleService } from './ble';
 import { of, throwError } from 'rxjs';
-import { doesNotThrow } from 'assert';
-
-
-
 
 describe('BleService', () => {
   let service: BleService;
@@ -170,6 +165,3 @@ describe('BleService', () => {
   });
 });
 
-
-
-//https://angular.io/guide/testing // create mock class and function 
