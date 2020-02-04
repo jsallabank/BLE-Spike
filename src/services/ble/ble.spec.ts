@@ -2,6 +2,7 @@ import { Injectable, NgZone,Component } from '@angular/core/';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BleService } from './ble';
 import { of, throwError } from 'rxjs';
+import { doesNotThrow } from 'assert';
 
 
 
@@ -91,7 +92,6 @@ describe('BleService', () => {
     expect(bleSpy.connect).toHaveBeenCalledWith(id);
     expect(onConnectSpy).toHaveBeenCalled();
   });
-
   it('connect should call API connect and fail', () => {
     const onDisconnectSpy = spyOn(service, 'onDisconnect');
     service.ble.connect = jasmine.createSpy().and.returnValue(throwError('error'));
@@ -99,44 +99,56 @@ describe('BleService', () => {
     expect(bleSpy.connect).toHaveBeenCalledWith(id);
     expect(onDisconnectSpy).toHaveBeenCalled();
   });
-  it('onConnect should call API startNotification and onChange', () => {
-    const onConnectSpy = spyOn(service, 'onChange');
+
+  it('onConnect should call this.read()', () => {
+    const onConnectSpy = spyOn(service, 'read');
     service.onConnect(device_data,service.notified);
-    //service.connect(id,service.notified);
-    expect(bleSpy.startNotification).toHaveBeenCalled();
-    expect(service.onChange).toHaveBeenCalled();
+    expect(onConnectSpy).toHaveBeenCalled();
   });
-  it('onConnect should call startNotification and notify of error', () => {
-    
-    service.ble.startNotification = jasmine.createSpy().and.returnValue(throwError('error'));
-    service.onConnect(device_data,service.notified);
-    expect(window.alert).toHaveBeenCalledWith('Unexpected Error, Failed to subscribe for data changes');
-    expect(bleSpy.startNotification).toHaveBeenCalled();
-  });
-  it('onConnect should call API read', () => {
-    service.onConnect(device_data,service.notified);
+
+  it('this.read() should call API read, call this.startNotification() and this.onChange()', async () => {
+    const startNotificationSpy = spyOn(service, 'startNotification');
+    const onChangeSpy = spyOn(service, 'onChange');
+    await service.read(id, device_data.characteristics[0].service, device_data.characteristics[0].characteristic, service.notified);
+    expect(startNotificationSpy).toHaveBeenCalled();
+    expect(onChangeSpy).toHaveBeenCalled();
     expect(bleSpy.read).toHaveBeenCalled();
   });
-  //ISSUES WITH THIS TEST...
-  // it('onConnect should call read and notify of error', () => {
-  //   spyOn(window, 'alert');
-  //   service.ble.read = jasmine.createSpy().and.returnValue(Promise.reject('error'));
-  //   service.onConnect(device_data,service.notified);
-  //   expect(window.alert).toHaveBeenCalledWith('Unexpected Error, Failed to read');
-  //   expect(bleSpy.read).toHaveBeenCalled();
-  // });
- 
-  it('writeToPeripheral should call API write with success alert', () => {
-    service.writeToPeripheral(id,formattedData);
-    expect(bleSpy.write).toHaveBeenCalled();
+  it('this.read() should notify of read error', async () => {
+    service.ble.read = jasmine.createSpy().and.returnValue(Promise.reject('error'));
+    await service.read(id, device_data.characteristics[0].service, device_data.characteristics[0].characteristic, service.notified);
+    expect(window.alert).toHaveBeenCalledWith('Unexpected Error, Failed to read');
+    expect(bleSpy.read).toHaveBeenCalled();
   });
-//Issues...
-  // it('writeToPeripheral should call API write with error alert', () => {
-  //   service.ble.write = jasmine.createSpy().and.returnValue(Promise.reject('error'));
-  //   service.writeToPeripheral(id,formattedData);
-  //   expect(bleSpy.write).toHaveBeenCalled().and.callThrough();
-  //   expect(window.alert).toHaveBeenCalledWith('write unsuccessful');
-  // });
+
+  it('this.startNotification() should call api startNotification() and this.onChange()', async () => {
+    const onChangeSpy = spyOn(service, 'onChange');
+    await service.startNotification(id, device_data.characteristics[0].service, device_data.characteristics[0].characteristic, service.notified);
+    expect(onChangeSpy).toHaveBeenCalled();
+  });
+  it('this.startNotification() should call api startNotification() and notify of error', async () => {
+    service.ble.startNotification = jasmine.createSpy().and.returnValue(throwError('error'));
+    await service.startNotification(id, device_data.characteristics[0].service, device_data.characteristics[0].characteristic, service.notified);
+    expect(window.alert).toHaveBeenCalledWith('Unexpected Error, Failed to subscribe for data changes');
+  });
+  
+  it('this.onChange should set globalData and call callback function', async () => {
+    const notifiedSpy = spyOn(service, 'notified');
+    await service.onChange(formattedData, service.notified);
+    expect(service.getCurrent()).toBe(1);
+    expect(notifiedSpy).toHaveBeenCalled();
+  });
+
+  it('writeToPeripheral should call API write with success alert', async () => {
+    await service.writeToPeripheral(id,formattedData);
+    expect(bleSpy.write).toHaveBeenCalled();
+    expect(window.alert).toHaveBeenCalledWith('succesful write');
+  });
+  it('writeToPeripheral should call API write with error alert', async () => {
+    bleSpy.write = jasmine.createSpy().and.returnValue(Promise.reject());
+    await service.writeToPeripheral(id,formattedData);
+    expect(service.alertMsg).toBe('write unsuccessful');
+  });
 
   it('getDevices should call API scan and onDeviceDiscovered', () => {
     const onDeviceSpy = spyOn(service, 'onDeviceDiscovered');

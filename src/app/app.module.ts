@@ -11,7 +11,7 @@ import { BLE } from '@ionic-native/ble/ngx';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { BleService } from 'src/services/ble/ble';
-import { mockBLE } from 'src/services/ble/mockBLE';
+
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,7 +19,7 @@ import { mockBLE } from 'src/services/ble/mockBLE';
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule],
   providers: [
     BleService,
-    mockBLE,
+    
     BLE,
     StatusBar,
     SplashScreen,

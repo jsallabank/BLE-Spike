@@ -690,8 +690,10 @@ var BleService = /** @class */ (function () {
         this.ngZone = ngZone;
         this.devices = [];
         this.peripheral = {};
+        this.connectBLE = this.ble.connect;
         this.service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
         this.characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
+        this.alertMsg = 'default alert';
     }
     BleService.prototype.getDevices = function () {
         var _this = this;
@@ -701,7 +703,7 @@ var BleService = /** @class */ (function () {
     };
     BleService.prototype.onDeviceDiscovered = function (device) {
         var _this = this;
-        console.log('device:' + device);
+        console.log('device:' + device[0]);
         console.log('Discovered' + JSON.stringify(device, null, 2));
         this.ngZone.run(function () {
             _this.devices.push(device);
@@ -710,6 +712,7 @@ var BleService = /** @class */ (function () {
     };
     BleService.prototype.connect = function (id, cb) {
         var _this = this;
+        console.log(this.ble);
         this.ble.connect(id).subscribe(function (peripheral) { return _this.onConnect(peripheral, cb); }, function () { return _this.onDisconnect(); });
     };
     BleService.prototype.onDisconnect = function () {
@@ -718,17 +721,28 @@ var BleService = /** @class */ (function () {
     BleService.prototype.onConnect = function (peripheral, cb) {
         var _this = this;
         this.peripheral = peripheral;
+        this.service_uuid = this.peripheral.characteristics[0].service;
+        this.characteristic_uuid = this.peripheral.characteristics[0].characteristic;
         alert('Connected to ' + (peripheral.name || peripheral.id));
         // Subscribe for notifications when the data changes
-        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(function (data) { _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to subscribe for data changes'); });
+        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(function (data) { _this.onChange(data, cb); }, function () {
+            _this.alertMsg = 'Unexpected Error, Failed to subscribe for data changes';
+            alert(_this.alertMsg);
+        });
         // Read the current value of the data characteristic
-        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(function (data) { _this.onChange(data, cb); }, function () { return alert('Unexpected Error, ' + 'Failed to get dat'); });
+        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(function (data) { _this.onChange(data, cb); }, function () {
+            _this.alertMsg = 'Unexpected Error, Failed to read';
+            alert(_this.alertMsg);
+        });
     };
     BleService.prototype.notified = function () {
         alert('Notified/Read: ' + globalData);
     };
     BleService.prototype.getCurrent = function () {
         return globalData;
+    };
+    BleService.prototype.setData = function (myNumber) {
+        globalData = myNumber;
     };
     BleService.prototype.onChange = function (buffer, cb) {
         var data = new Uint8Array(buffer);
@@ -738,7 +752,14 @@ var BleService = /** @class */ (function () {
         });
     };
     BleService.prototype.writeToPeripheral = function (id, writeData) {
-        this.ble.write(id, this.service_uuid, this.characteristic_uuid, writeData).then(function () { return alert('succesful write'); }, function () { return alert('write unsuccessful'); });
+        var _this = this;
+        this.ble.write(id, this.service_uuid, this.characteristic_uuid, writeData).then(function () {
+            _this.alertMsg = 'succesful write';
+            alert(_this.alertMsg);
+        }, function () {
+            _this.alertMsg = 'write unsuccessful';
+            alert(_this.alertMsg);
+        });
     };
     BleService.ctorParameters = function () { return [
         { type: _ionic_native_ble_ngx__WEBPACK_IMPORTED_MODULE_2__["BLE"] },
