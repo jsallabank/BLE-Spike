@@ -43,8 +43,9 @@ export class BleService {
 
   onConnect(peripheral, cb) {
     this.peripheral = peripheral;
-    this.serviceUuid = this.peripheral.characteristics[0].service;
-    this.characteristicUuid = this.peripheral.characteristics[0].characteristic;
+    //setting to battery service
+    this.serviceUuid = this.peripheral.characteristics[6].service;
+    this.characteristicUuid = this.peripheral.characteristics[6].characteristic;
     alert('Connected to ' + (peripheral.name || peripheral.id))
     // Subscribe for notifications when the data changes
     this.read(this.peripheral.id, this.serviceUuid, this.characteristicUuid, cb);

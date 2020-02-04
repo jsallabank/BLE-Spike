@@ -677,8 +677,8 @@ let BleService = class BleService {
         this.devices = [];
         this.peripheral = {};
         this.connectBLE = this.ble.connect;
-        this.service_uuid = '0000180F-0000-1000-8000-00805f9b34fb';
-        this.characteristic_uuid = '00002A19-0000-1000-8000-00805f9b34fb';
+        this.serviceUuid = '0000180F-0000-1000-8000-00805f9b34fb';
+        this.characteristicUuid = '00002A19-0000-1000-8000-00805f9b34fb';
         this.alertMsg = 'default alert';
     }
     getDevices() {
@@ -703,17 +703,26 @@ let BleService = class BleService {
     }
     onConnect(peripheral, cb) {
         this.peripheral = peripheral;
-        this.service_uuid = this.peripheral.characteristics[0].service;
-        this.characteristic_uuid = this.peripheral.characteristics[0].characteristic;
+        //setting to battery service
+        this.serviceUuid = this.peripheral.characteristics[6].service;
+        this.characteristicUuid = this.peripheral.characteristics[6].characteristic;
         alert('Connected to ' + (peripheral.name || peripheral.id));
         // Subscribe for notifications when the data changes
-        this.ble.startNotification(this.peripheral.id, this.service_uuid, this.characteristic_uuid).subscribe(data => { this.onChange(data, cb); }, () => {
-            this.alertMsg = 'Unexpected Error, Failed to subscribe for data changes';
+        this.read(this.peripheral.id, this.serviceUuid, this.characteristicUuid, cb);
+    }
+    read(id, serviceUuid, characteristicUuid, cb) {
+        // Read the current value of the data characteristic
+        this.ble.read(id, serviceUuid, characteristicUuid).then(data => {
+            this.onChange(data, cb);
+            this.startNotification(id, serviceUuid, characteristicUuid, cb);
+        }, () => {
+            this.alertMsg = 'Unexpected Error, Failed to read';
             alert(this.alertMsg);
         });
-        // Read the current value of the data characteristic
-        this.ble.read(this.peripheral.id, this.service_uuid, this.characteristic_uuid).then(data => { this.onChange(data, cb); }, () => {
-            this.alertMsg = 'Unexpected Error, Failed to read';
+    }
+    startNotification(id, serviceUuid, characteristicUuid, cb) {
+        this.ble.startNotification(id, serviceUuid, characteristicUuid).subscribe(data => { this.onChange(data, cb); }, () => {
+            this.alertMsg = 'Unexpected Error, Failed to subscribe for data changes';
             alert(this.alertMsg);
         });
     }
@@ -734,7 +743,7 @@ let BleService = class BleService {
         });
     }
     writeToPeripheral(id, writeData) {
-        this.ble.write(id, this.service_uuid, this.characteristic_uuid, writeData).then(() => {
+        this.ble.write(id, this.serviceUuid, this.characteristicUuid, writeData).then(() => {
             this.alertMsg = 'succesful write';
             alert(this.alertMsg);
         }, () => {
